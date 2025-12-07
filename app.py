@@ -134,3 +134,10 @@ if selected_card["id"] in st.session_state.favorites:
 else:
     if st.button("Add to Watchlist"):
         st.session_state.favorites.add(selected_card["id"])
+
+
+# adding dark mode toggle
+theme_choice = st.sidebar.radio("Theme", ["Dark", "Light"])
+
+if theme_choice == "Dark":
+    st.write("<style>body { background-color: black; color: white; }</style>", unsafe_allow_html=True)
