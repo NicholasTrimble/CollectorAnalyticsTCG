@@ -1,3 +1,5 @@
+![Dashboard](CollectorAnalytics.png)
+
 CollectorAnalytics
 
 CollectorAnalytics is a personal capstone project focused on exploring Magic: The Gathering card data and turning it into something useful from both a backend engineering and data analysis perspective. The project collects real card information from the Scryfall API, stores it locally in a SQLite database, and exposes it through a FastAPI backend. A separate Streamlit dashboard provides a user interface where data can be searched, filtered, visualized, and explored interactively. The idea behind the project was to start simple and expand step by step, eventually building a full end-to-end workflow that feels like a real production application rather than a small hobby script.
