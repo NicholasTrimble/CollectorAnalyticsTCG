@@ -88,15 +88,6 @@ col1.metric("Highest Price", f"${highest_price:.2f}", highest_name)
 col2.metric("Average Price", f"${avg_price:.2f}")
 
 
-# --- Price Distribution ---
-st.subheader("Price Distribution")
-chart = alt.Chart(filtered).mark_bar().encode(
-    alt.X("usd_price", bin=alt.Bin(maxbins=30), title="Price USD"),
-    alt.Y("count()", title="Card Count")
-).properties(height=300)
-
-st.altair_chart(chart, use_container_width=True)
-
 # --- Table + card detail ---
 st.subheader("Browse Cards")
 
@@ -126,6 +117,18 @@ with card_cols[1]:
     st.write(f"Price: ${selected_card['usd_price'] or 0:.2f}")
     st.write(f"Foil Price: ${selected_card['usd_foil_price'] or 0:.2f}")
     st.markdown(f"[View on Scryfall]({selected_card['scryfall_uri']})")
+
+
+# --- Price Distribution ---
+st.subheader("Price Distribution")
+chart = alt.Chart(filtered).mark_bar().encode(
+    alt.X("usd_price", bin=alt.Bin(maxbins=30), title="Price USD"),
+    alt.Y("count()", title="Card Count")
+).properties(height=300)
+
+st.altair_chart(chart, use_container_width=True)
+
+
 
 # --- Favorites ---
 if selected_card["id"] in st.session_state.favorites:
