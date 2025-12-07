@@ -5,7 +5,7 @@ DB_FILE = "data/cards.db"
 
 app = FastAPI(title="Card Price API")
 
-def query_cards(rarity: str = None, sort: str = None, order: str = "asc", search: str = None):
+def query_cards(rarity=None, sort=None, order="asc", search=None, limit=50, offset=0):
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -28,10 +28,28 @@ def query_cards(rarity: str = None, sort: str = None, order: str = "asc", search
     if sort:
         base_query += f" ORDER BY {sort} {order.upper()}"
 
+    base_query += " LIMIT ? OFFSET ?"
+    params += [limit, offset]
+
     cursor.execute(base_query, params)
-    rows = cursor.fetchall()
+    result = cursor.fetchall()
+
     conn.close()
-    return [dict(r) for r in rows]
+    return [dict(r) for r in result]
+
+
+@app.get("/cards")
+def get_cards(
+    rarity: str | None = Query(default=None),
+    sort: str | None = Query(default=None),
+    order: str | None = Query(default="asc"),
+    search: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=50, ge=1, le=500)
+):
+    offset = (page - 1) * limit
+    results = query_cards(rarity, sort, order, search, limit, offset)
+    return {"count": len(results), "results": results}
 
 
 @app.post("/favorites/{card_id}")
@@ -45,7 +63,7 @@ def add_favorite(card_id: str):
         conn.close()
         raise HTTPException(status_code=400, detail="Card already in favorites")
     conn.close()
-    return {"message": "Card added to favorites", "card_id": card_id}
+    return {"message": "Added"}
 
 @app.delete("/favorites/{card_id}")
 def remove_favorite(card_id: str):
@@ -54,28 +72,15 @@ def remove_favorite(card_id: str):
     cursor.execute("DELETE FROM favorites WHERE id = ?", (card_id,))
     conn.commit()
     conn.close()
-    return {"message": "Card removed from favorites", "card_id": card_id}
+    return {"message": "Removed"}
 
 @app.get("/favorites")
-def list_favorites():
+def get_favorites():
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("""
+    rows = conn.execute("""
         SELECT c.* FROM cards c
         JOIN favorites f ON c.id = f.id
-    """)
-    rows = cursor.fetchall()
+    """).fetchall()
     conn.close()
     return {"count": len(rows), "results": [dict(r) for r in rows]}
-
-
-@app.get("/cards")
-def read_cards(
-    rarity: str | None = Query(default=None),
-    sort: str | None = Query(default=None),
-    order: str | None = Query(default="asc"),
-    search: str | None = Query(default=None)
-):
-    results = query_cards(rarity, sort, order, search)
-    return {"count": len(results), "results": results}

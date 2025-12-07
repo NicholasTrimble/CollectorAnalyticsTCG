@@ -73,12 +73,15 @@ if len(cards) == 0:
 st.write(f"Showing **{len(cards)} cards**")
 
 if cards:
-    highest = max(cards, key=lambda c: c["usd_price"] or 0)
+    highest = max(cards, key=lambda c: (c["usd_price"] or 0))
     avg_price = sum((c["usd_price"] or 0) for c in cards) / len(cards)
 
+    high_price = highest["usd_price"] or 0
     col1, col2 = st.columns(2)
-    col1.metric("Highest Price", f"${highest['usd_price']:.2f}", highest["name"])
+    col1.metric("Highest Price", f"${high_price:.2f}", highest["name"])
     col2.metric("Avg Price", f"${avg_price:.2f}")
+
+
 
 # Price Distribution Chart
 df = pd.DataFrame(cards)
