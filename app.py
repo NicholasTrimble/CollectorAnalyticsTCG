@@ -68,24 +68,23 @@ if len(filtered) == 0:
     st.warning("No results match your filters.")
     st.stop()
 
-# --- Metrics ---
-if filtered["usd_price"].notna().any():
-    highest_row = filtered.loc[filtered["usd_price"].fillna(0).idxmax()]
-    highest_price = highest_row["usd_price"] or 0
-else:
-    highest_row = None
-    highest_price = 0
+# Metrics
 
-avg_price = filtered["usd_price"].fillna(0).mean()
+
+filtered["usd_price"] = pd.to_numeric(filtered["usd_price"], errors="coerce")
+
+if filtered["usd_price"].dropna().empty:
+    highest_price = 0
+    highest_name = "No priced cards"
+    avg_price = 0
+else:
+    highest_price = filtered["usd_price"].max()
+    highest_row = filtered.loc[filtered["usd_price"] == highest_price].iloc[0]
+    highest_name = highest_row["name"]
+    avg_price = filtered["usd_price"].mean()
 
 col1, col2 = st.columns(2)
-
-col1.metric(
-    "Highest Price",
-    f"${highest_price:.2f}",
-    highest_row["name"] if highest_row is not None else "N/A"
-)
-
+col1.metric("Highest Price", f"${highest_price:.2f}", highest_name)
 col2.metric("Average Price", f"${avg_price:.2f}")
 
 
