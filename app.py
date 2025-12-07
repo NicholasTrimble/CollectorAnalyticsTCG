@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import altair as alt
+import os
 
 DATA_FILE = "data/all_cards_cleaned.json"
 
@@ -68,12 +69,25 @@ if len(filtered) == 0:
     st.stop()
 
 # --- Metrics ---
-highest = filtered.loc[filtered["usd_price"].fillna(0).idxmax()]
+if filtered["usd_price"].notna().any():
+    highest_row = filtered.loc[filtered["usd_price"].fillna(0).idxmax()]
+    highest_price = highest_row["usd_price"] or 0
+else:
+    highest_row = None
+    highest_price = 0
+
 avg_price = filtered["usd_price"].fillna(0).mean()
 
 col1, col2 = st.columns(2)
-col1.metric("Highest Price", f"${highest['usd_price'] or 0:.2f}", highest["name"])
+
+col1.metric(
+    "Highest Price",
+    f"${highest_price:.2f}",
+    highest_row["name"] if highest_row is not None else "N/A"
+)
+
 col2.metric("Average Price", f"${avg_price:.2f}")
+
 
 # --- Price Distribution ---
 st.subheader("Price Distribution")

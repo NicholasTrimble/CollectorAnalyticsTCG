@@ -1,3 +1,5 @@
-data/*.json
-data/*.db
+data/*
+!.gitkeep
+!data/all_cards_cleaned.json
+.env
 __pycache__/
