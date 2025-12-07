@@ -88,20 +88,24 @@ col1.metric("Highest Price", f"${highest_price:.2f}", highest_name)
 col2.metric("Average Price", f"${avg_price:.2f}")
 
 
-# --- Card Detail FIRST ---
+# Card detail + table
 
 st.subheader("Card Preview")
 
-# Determine selected card based on UI selection stored in session state
+# Ensure we always have a valid selected_index
 if "selected_index" not in st.session_state:
+    st.session_state.selected_index = 0
+
+# If filters changed and index is out of range, reset to 0
+if st.session_state.selected_index < 0 or st.session_state.selected_index >= len(filtered):
     st.session_state.selected_index = 0
 
 subset = filtered[["name", "usd_price", "rarity", "set_name"]]
 
-# Get the selected card details
+# Get the currently selected card
 selected_card = filtered.iloc[st.session_state.selected_index].to_dict()
 
-# Display Card Details
+# Show card details ABOVE the table
 card_cols = st.columns([1, 2])
 
 with card_cols[0]:
@@ -120,20 +124,18 @@ with card_cols[1]:
     st.write(f"Foil Price: ${selected_card['usd_foil_price'] or 0:.2f}")
     st.markdown(f"[View on Scryfall]({selected_card['scryfall_uri']})")
 
-
-# --- Table BELOW (with selection updating preview) ---
-
+# Now show the table BELOW the details
 st.subheader("Browse Cards")
 
-selected = st.dataframe(
+table = st.dataframe(
     subset,
     use_container_width=True,
     on_select="rerun"
 )
 
-# Update selection if user clicked a new row
-if hasattr(selected, "selection") and selected.selection.rows:
-    st.session_state.selected_index = selected.selection.rows[0]
+# Update selected index when the user clicks a row
+if hasattr(table, "selection") and table.selection.rows:
+    st.session_state.selected_index = table.selection.rows[0]
 
 
 
