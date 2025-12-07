@@ -1,4 +1,4 @@
-![Dashboard](CollectorAnalytics.png)
+![Dashboard](CollectorAnalyticsTCG.png)
 
 CollectorAnalytics
 
