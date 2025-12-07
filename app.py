@@ -90,7 +90,17 @@ col2.metric("Average Price", f"${avg_price:.2f}")
 
 # --- Table + card detail ---
 
-# card display
+st.subheader("Browse Cards")
+
+subset = filtered[["name", "usd_price", "rarity", "set_name"]]
+selected = st.dataframe(subset, on_select="rerun", use_container_width=True)
+
+if hasattr(selected, "selection") and selected.selection.rows:
+    selected_index = selected.selection.rows[0]
+    selected_card = filtered.iloc[selected_index].to_dict()
+else:
+    selected_card = filtered.iloc[0].to_dict()
+
 st.subheader(f"Details: {selected_card['name']}")
 card_cols = st.columns([1, 2])
 
@@ -108,18 +118,6 @@ with card_cols[1]:
     st.write(f"Price: ${selected_card['usd_price'] or 0:.2f}")
     st.write(f"Foil Price: ${selected_card['usd_foil_price'] or 0:.2f}")
     st.markdown(f"[View on Scryfall]({selected_card['scryfall_uri']})")
-
-# browsing cards table
-st.subheader("Browse Cards")
-
-subset = filtered[["name", "usd_price", "rarity", "set_name"]]
-selected = st.dataframe(subset, on_select="rerun", use_container_width=True)
-
-if hasattr(selected, "selection") and selected.selection.rows:
-    selected_index = selected.selection.rows[0]
-    selected_card = filtered.iloc[selected_index].to_dict()
-else:
-    selected_card = filtered.iloc[0].to_dict()
 
 
 
