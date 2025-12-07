@@ -88,20 +88,20 @@ col1.metric("Highest Price", f"${highest_price:.2f}", highest_name)
 col2.metric("Average Price", f"${avg_price:.2f}")
 
 
-# --- Table + card detail ---
+# --- Card Detail FIRST ---
 
-st.subheader("Browse Cards")
+st.subheader("Card Preview")
+
+# Determine selected card based on UI selection stored in session state
+if "selected_index" not in st.session_state:
+    st.session_state.selected_index = 0
 
 subset = filtered[["name", "usd_price", "rarity", "set_name"]]
-selected = st.dataframe(subset, on_select="rerun", use_container_width=True)
 
-if hasattr(selected, "selection") and selected.selection.rows:
-    selected_index = selected.selection.rows[0]
-    selected_card = filtered.iloc[selected_index].to_dict()
-else:
-    selected_card = filtered.iloc[0].to_dict()
+# Get the selected card details
+selected_card = filtered.iloc[st.session_state.selected_index].to_dict()
 
-st.subheader(f"Details: {selected_card['name']}")
+# Display Card Details
 card_cols = st.columns([1, 2])
 
 with card_cols[0]:
@@ -111,6 +111,7 @@ with card_cols[0]:
         st.text("No Image Available")
 
 with card_cols[1]:
+    st.write(f"Name: {selected_card['name']}")
     st.write(f"Set: {selected_card['set_name']}")
     st.write(f"Collector #: {selected_card['collector_number']}")
     st.write(f"Rarity: {selected_card['rarity']}")
@@ -118,6 +119,21 @@ with card_cols[1]:
     st.write(f"Price: ${selected_card['usd_price'] or 0:.2f}")
     st.write(f"Foil Price: ${selected_card['usd_foil_price'] or 0:.2f}")
     st.markdown(f"[View on Scryfall]({selected_card['scryfall_uri']})")
+
+
+# --- Table BELOW (with selection updating preview) ---
+
+st.subheader("Browse Cards")
+
+selected = st.dataframe(
+    subset,
+    use_container_width=True,
+    on_select="rerun"
+)
+
+# Update selection if user clicked a new row
+if hasattr(selected, "selection") and selected.selection.rows:
+    st.session_state.selected_index = selected.selection.rows[0]
 
 
 
